@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:14
 
 WORKDIR /app
 
@@ -6,6 +6,10 @@ COPY package*.json ./
 
 RUN npm install
 
+RUN npm install express
+
+EXPOSE 3000
+
 COPY . .
 
-CMD ["npm", "run", "node"]
+CMD ["node", "app.js"]

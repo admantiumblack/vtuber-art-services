@@ -1,0 +1,22 @@
+{
+  "name": "vtuber-art-services",
+  "version": "1.0.0",
+  "description": "vtuber art danbooru",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/admantiumblack/vtuber-art-services.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/admantiumblack/vtuber-art-services/issues"
+  },
+  "homepage": "https://github.com/admantiumblack/vtuber-art-services#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
