@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:18
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ EXPOSE 3000
 
 COPY . .
 
-ENTRYPOINT ["nodemon", "/app/app.js"]  
+ENTRYPOINT ["nodemon", "./src/app.js"]  
 
 CMD ["npm", "run", "dev"]
 # CMD ["node", "app.js"]

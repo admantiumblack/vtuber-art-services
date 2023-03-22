@@ -2,10 +2,10 @@
   "name": "vtuber-art-services",
   "version": "1.0.0",
   "description": "vtuber art danbooru",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node main",
+    "dev": "nodemon main"
   },
   "repository": {
     "type": "git",
