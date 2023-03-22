@@ -12,6 +12,10 @@ RUN npm install express
 
 RUN npm install nodemon
 
+RUN npm install dotenv
+
+RUN npm install mysql
+
 EXPOSE 3000
 
 COPY . .
