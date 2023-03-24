@@ -16,6 +16,8 @@ RUN npm install dotenv
 
 RUN npm install mysql
 
+RUN npm install axios
+
 EXPOSE 3000
 
 COPY . .
