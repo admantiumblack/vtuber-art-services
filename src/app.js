@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const dotenv = require("dotenv").config();
 const axios = require('axios');
+const config = require('./config');
 const app = express();
 
 app.use(express.json());
@@ -12,25 +13,26 @@ app.get("/", async (req, res) =>{
 });
 
 app.get('/art', async (req, res) => {
-    const { vtuber_name } = req.query;
     try {
         // Get a connection from the MySQL connection pool
-        const connection = await pool.promise().getConnection();
+        const connection = await mysql.createConnection(config.mysql);
         // Execute a MySQL query to retrieve data
-        const [rows, fields] = await connection.query(
+        const [rows] = await connection.query(
           'SELECT * FROM vtuber WHERE vtuber_name = ?',
           [vtuber_name]
         );
+        const tags = rows.map((row)=> row.vtuber_name).join(' ');
         // Release the MySQL connection back to the pool
         connection.release();
 
-        const apiUrl = `https://danbooru.donmai.us/posts.xml?tags=${rows[0].vtuber_name}+rating:g`;
-
+        const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
 
         const response = await axios.get(apiUrl);
+        const xml = response.data
         // Send the XML response back to the client
         res.set('Content-Type', 'text/xml');
-        res.send(response.data);
+        res.send(xml);
+
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal server error');
