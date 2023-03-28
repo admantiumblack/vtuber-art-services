@@ -12,20 +12,20 @@ app.get("/", async (req, res) =>{
     res.json({status: "API is Running and functioning"});
 });
 
-app.get('/art', async (req, res) => {
+app.get('/art', async function(req, res){
   try {
-      const vtuber_name = req.query.name;
+      const vtuber_name = req.params.name;
       // Get a connection from the MySQL connection pool
       const connection = await mysql.createConnection(config.mysql);
       // Execute a MySQL query to retrieve data
-      const [rows] = await connection.query(
-        'SELECT * FROM vtuber WHERE vtuber_name = ?',
+      const [vtuber] = await connection.query(
+        'SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?',
         [vtuber_name]
       );
-      const tags = rows.map((row)=> row.vtuber_name.toLowerCase().replace(/\s+/g, '_')).join(' ');
       // Release the MySQL connection back to the pool
       connection.release();
 
+      const tags = vtuber[0].vtuber_name.toLowerCase().replace(/\s+/g, '_');
       const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
 
       const response = await axios.get(apiUrl);
@@ -39,6 +39,8 @@ app.get('/art', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+
 
 
 app.listen(port, ()=> {
