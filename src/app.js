@@ -13,22 +13,44 @@ app.get("/", async (req, res) =>{
 });
 
 app.get('/art', async function(req, res){
-
-    const name = req.query.name;
+    const id = req.query.id;
     const connection = await mysql.createConnection(config.mysql);
-    if(connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?', [name])){
-      const vtuber_name = name;
-      const tags = vtuber_name.replace(/\s+/g, '_');
-      const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
-      const response = await axios.get(apiUrl);
-      const xml = response.data
-      // Send the XML response back to the client
-      res.set('Content-Type', 'text/xml');
-      res.send(xml);
-    }else{
-      res.json('Not Found');
-    };
+    connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_id = ?', [id], async (error, results) => {
+      if(error){
+          res.json({status: error});
+      } else {
+          // res.json({name: results[0].vtuber_name});
+          const vtuber_name = results[0].vtuber_name;
+          // res.json({vtuber_name:vtuber_name});
+          // const vtuber_name = name;
+          const tags = vtuber_name.replace(/\s+/g, '_');
+          // res.json({test:tags})
+          const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
+          const response = await axios.get(apiUrl);
+          const xml = response.data
+          // Send the XML response back to the client
+          res.set('Content-Type', 'text/xml');
+          res.send(xml);
+      }
+      
+   });
 
+    
+    // const id = req.query.id;
+    // const connection = await mysql.createConnection(config.mysql);
+    // if(connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_id = ?', [id])){
+    //   const name = req.query.name;
+    //   const vtuber_name = name
+    //   const tags = vtuber_name.replace(/\s+/g, '_');
+    //   const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
+    //   const response = await axios.get(apiUrl);
+    //   const xml = response.data
+    //   // Send the XML response back to the client
+    //   res.set('Content-Type', 'text/xml');
+    //   res.send(xml);
+    // }else{
+    //   res.json('Not Found');
+    // };
 
   // try {
   //     const name = req.query.name;
