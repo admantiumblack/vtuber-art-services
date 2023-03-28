@@ -13,31 +13,48 @@ app.get("/", async (req, res) =>{
 });
 
 app.get('/art', async function(req, res){
-  try {
-      const name = req.params.name;
-      // Get a connection from the MySQL connection pool
-      const connection = await mysql.createConnection(config.mysql);
-      // Execute a MySQL query to retrieve data
-      const [vtuber] = await connection.query(
-        'SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?',
-        [name]
-      );
-      // Release the MySQL connection back to the pool
-      connection.release();
 
-      const tags = vtuber[0].name.toLowerCase().replace(/\s+/g, '_');
-      const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
-
+    const name = req.query.name;
+    const connection = await mysql.createConnection(config.mysql);
+    if(connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?', [name])){
+      const vtuber_name = name;
+      const tags = vtuber_name.replace(/\s+/g, '_');
+      const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
       const response = await axios.get(apiUrl);
       const xml = response.data
       // Send the XML response back to the client
       res.set('Content-Type', 'text/xml');
       res.send(xml);
+    }else{
+      res.json('Not Found');
+    };
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
-  }
+
+  // try {
+  //     const name = req.query.name;
+  //     // Get a connection from the MySQL connection pool
+  //     const connection = await mysql.createConnection(config.mysql);
+  //     // Execute a MySQL query to retrieve data
+  //     const [vtuber] = await connection.query(
+  //       'SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?',
+  //       [name]
+  //     );
+  //     // Release the MySQL connection back to the pool
+  //     connection.release();
+
+  //     const tags = vtuber[0].name.toLowerCase().replace(/\s+/g, '_');
+  //     const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
+
+  //     const response = await axios.get(apiUrl);
+  //     const xml = response.data
+  //     // Send the XML response back to the client
+  //     res.set('Content-Type', 'text/xml');
+  //     res.send(xml);
+
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).send('Internal server error');
+  // }
 });
 
 
