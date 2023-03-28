@@ -14,18 +14,18 @@ app.get("/", async (req, res) =>{
 
 app.get('/art', async function(req, res){
   try {
-      const vtuber_name = req.params.name;
+      const name = req.params.name;
       // Get a connection from the MySQL connection pool
       const connection = await mysql.createConnection(config.mysql);
       // Execute a MySQL query to retrieve data
       const [vtuber] = await connection.query(
         'SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?',
-        [vtuber_name]
+        [name]
       );
       // Release the MySQL connection back to the pool
       connection.release();
 
-      const tags = vtuber[0].vtuber_name.toLowerCase().replace(/\s+/g, '_');
+      const tags = vtuber[0].name.toLowerCase().replace(/\s+/g, '_');
       const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
 
       const response = await axios.get(apiUrl);
