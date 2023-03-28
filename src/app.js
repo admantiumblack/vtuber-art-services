@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const dotenv = require("dotenv").config();
 const axios = require('axios');
 const config = require('./config');
+const xml2js = require('xml2js');
 const app = express();
 
 app.use(express.json());
@@ -27,10 +28,20 @@ app.get('/art', async function(req, res){
           // res.json({test:tags})
           const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
           const response = await axios.get(apiUrl);
-          const xml = response.data
-          // Send the XML response back to the client
-          res.set('Content-Type', 'text/xml');
-          res.send(xml);
+          xml2js.parseString(response.data, (err, result) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send('Error parsing XML response');
+            } else {
+                // Send the JSON response back to the client
+                res.json(result);
+            }
+        });
+          // const xml = response.data
+          // // Send the XML response back to the client
+          // res.set('Content-Type', 'text/xml');
+          // res.send(xml);
+
       }
       
    });

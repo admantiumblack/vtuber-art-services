@@ -18,6 +18,8 @@ RUN npm install mysql
 
 RUN npm install axios
 
+RUN npm install xml2js
+
 EXPOSE 3000
 
 COPY . .
