@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 const port = process.env.PORT || 3000;
-
+const url = process.env.URL;
 app.get("/", async (req, res) =>{
     res.json({status: "API is Running and functioning"});
 });
@@ -20,75 +20,109 @@ app.get('/art', async function(req, res){
       if(error){
           res.json({status: error});
       } else {
-          // res.json({name: results[0].vtuber_name});
           const vtuber_name = results[0].vtuber_name;
-          // res.json({vtuber_name:vtuber_name});
-          // const vtuber_name = name;
           const tags = vtuber_name.replace(/\s+/g, '_');
-          // res.json({test:tags})
-          const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
+          const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?page=${req.query.page || 1}&tags=${tags}&limit=${req.query.limit || 20}+rating:g}`;
           const response = await axios.get(apiUrl);
           xml2js.parseString(response.data, (err, result) => {
             if (err) {
                 console.error(err);
                 res.status(500).send('Error parsing XML response');
             } else {
-                // Send the JSON response back to the client
-                res.json(result);
+              function buildUrl(url, param) {
+                let paramParts = [];
+                for (let key in param) {
+                  if (Array.isArray(param[key])) {
+                    paramParts.push(`${key}=${param[key].join(',')}`);
+                  } else {
+                    paramParts.push(`${key}=${param[key]}`);
+                  }
+                //   console.log(key);
+                }
+                // console.log(param)
+                let finalUrl = url + '?' + paramParts.join('&');
+                return finalUrl;
+              }
+              
+              function createMetadata(url, page, param) {
+                let metadata = {
+                  'next_page': buildUrl(url, {...param, page: (+ req.query.page || 1) + 1, limit: (req.query.limit || 20)}),
+                  'prev_page': null
+                }
+                if ((parseInt(page)-1) > 0) {
+                  metadata['prev_page'] = buildUrl(url, {...param, page: (+ req.query.page || 1) - 1, limit: (req.query.limit || 20)});
+                }
+                return metadata;
             }
-        });
-          // const xml = response.data
-          // // Send the XML response back to the client
-          // res.set('Content-Type', 'text/xml');
-          // res.send(xml);
 
-      }
-      
+              const metadata = createMetadata(url+req.url.split('?')[0], (parseInt(req.query.page) || 1), req.query);
+            // console.log(req.query)
+              res.json({
+                data:result.posts,
+                meta:metadata
+              });
+            }
+          });
+      }   
    });
+  });
 
-    
-    // const id = req.query.id;
-    // const connection = await mysql.createConnection(config.mysql);
-    // if(connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_id = ?', [id])){
-    //   const name = req.query.name;
-    //   const vtuber_name = name
-    //   const tags = vtuber_name.replace(/\s+/g, '_');
-    //   const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g}`;
-    //   const response = await axios.get(apiUrl);
-    //   const xml = response.data
-    //   // Send the XML response back to the client
-    //   res.set('Content-Type', 'text/xml');
-    //   res.send(xml);
-    // }else{
-    //   res.json('Not Found');
-    // };
 
-  // try {
-  //     const name = req.query.name;
-  //     // Get a connection from the MySQL connection pool
-  //     const connection = await mysql.createConnection(config.mysql);
-  //     // Execute a MySQL query to retrieve data
-  //     const [vtuber] = await connection.query(
-  //       'SELECT vtuber_name FROM vtuber WHERE vtuber_name = ?',
-  //       [name]
-  //     );
-  //     // Release the MySQL connection back to the pool
-  //     connection.release();
+// app.get('/art', async function(req, res){
+//     const id = req.query.id;
+//     const connection = await mysql.createConnection(config.mysql);
+//     connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_id = ?', [id], async (error, results) => {
+//       if(error){
+//           res.json({status: error});
+//       } else {
+//           const vtuber_name = results[0].vtuber_name;
+//           const tags = vtuber_name.replace(/\s+/g, '_');
+//           const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?page=1&tags=${tags}+rating:g}`;
+//           const response = await axios.get(apiUrl);
+//           xml2js.parseString(response.data, (err, result) => {
+//             if (err) {
+//                 console.error(err);
+//                 res.status(500).send('Error parsing XML response');
+//             } else {
+//                 function buildUrl(url, param) {
+//                     let paramParts = [];
+//                     for (let key in param) {
+//                       if (Array.isArray(param[key])) {
+//                         paramParts.push(`${key}=${param[key].join(',')}`);
+//                       } else {
+//                         paramParts.push(`${key}=${param[key]}`);
+//                       }
+//                     }
+//                     let finalUrl = url + '?' + paramParts.join('&');
+//                     return finalUrl;
+//                   }
+                  
+//                   function createMetadata(url, offset, limit, param) {
+//                     let nextOffset = offset + limit;
+//                     let prevOffset = offset - limit;
+//                     let metadata = {
+//                       'next_page': buildUrl(url, {...param, offset: nextOffset, limit}),
+//                       'prev_page': null
+//                     }
+//                     if (prevOffset >= 0) {
+//                       metadata['prev_page'] = buildUrl(url, {...param, offset: prevOffset, limit});
+//                     }
+//                     return metadata;
+//                   }
+//                 res.json({
+//                     data:result.posts, 
+//                     meta:metadata
+//                 });
+//             }
+//         });
+//       }   
+//    });
 
-  //     const tags = vtuber[0].name.toLowerCase().replace(/\s+/g, '_');
-  //     const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&${req.url.split('?')[1]}`;
-
-  //     const response = await axios.get(apiUrl);
-  //     const xml = response.data
-  //     // Send the XML response back to the client
-  //     res.set('Content-Type', 'text/xml');
-  //     res.send(xml);
-
-  // } catch (error) {
-  //   console.error(error);
-  //   res.status(500).send('Internal server error');
-  // }
-});
+//    meta: {
+//     next page = "https://danbooru.donmai.us/posts.json?page=3&tags=gawr_gura+rating%3Ag"
+//     prev page = "https://danbooru.donmai.us/posts.json?page=1&tags=gawr_gura+rating%3Ag"
+//    } 
+// });
 
 
 
@@ -102,15 +136,6 @@ app.listen(port, ()=> {
 
 //https://ourweb.com/art?name=gawr_gura&rating=g&ordersfbsd
 
-// app.listen(PORT, function (err) {
-//     if (err) console.log(err);
-//     console.log("Server listening on PORT", PORT);
-// });
-
-
-// app.get("/art", async (req, res) =>{
-//     res.json({status: "API is Running and functioning"});
-// });
 
 // const pool = mysql.createPool({
 //     user: process.env.DB_USER,
