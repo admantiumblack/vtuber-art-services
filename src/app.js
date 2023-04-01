@@ -45,7 +45,8 @@ app.get('/art', async function(req, res){
       } else {
           const vtuber_name = results[0].vtuber_name;
           const tags = vtuber_name.replace(/\s+/g, '_');
-          const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?page=${req.query.page || 1}&tags=${tags}&limit=${req.query.limit || 20}+rating:g}`;
+          const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?tags=${tags}+rating:g&page=${req.query.page || 1}&limit=${req.query.limit || 20}}`;
+          // const apiUrl = `${config.danbooru.baseUrl}${config.danbooru.apiPath}?page=${req.query.page || 1}&tags=${tags}&limit=${req.query.limit || 20}+rating:g}`;
           const response = await axios.get(apiUrl);
           xml2js.parseString(response.data, (err, result) => {
             if (err) {
