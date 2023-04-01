@@ -16,6 +16,9 @@ app.get("/", async (req, res) =>{
 app.get('/art', async function(req, res){
     const id = req.query.id;
     const connection = await mysql.createConnection(config.mysql);
+    connection.on('error', function(err) {
+      console.log(err.code);
+    });
     connection.query('SELECT vtuber_name FROM vtuber WHERE vtuber_id = ?', [id], async (error, results) => {
       if(error){
           res.json({status: error});
